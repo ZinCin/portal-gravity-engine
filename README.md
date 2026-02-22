@@ -1,5 +1,7 @@
 # Portal Gravity Engine
 
+NOTE: If you prefer to read in English, please open the en_README.md file.
+
 Интерактивная симуляция потенциального поля. Решает уравнение Лапласа методом SOR (Successive Over-Relaxation). Подробнее в examples/explanation.pdf
 
 Можно расставлять якоря, порталы, препятствия на сетке и наблюдать за результатом.
