@@ -68,6 +68,25 @@ class CouplePortal:
         return f"CouplePortal(p1={self.p1!r}, p2={self.p2!r})"
 
 
+@dataclass
+class MultiPortal:
+    """Несколько порталов с одинаковым потенциалом"""
+    args: tuple[Portal]
+
+    def get_combined_mask(self, X: "np.ndarray",
+                          Y: "np.ndarray") -> "np.ndarray":
+        if not len(args):
+            return
+
+        local_mask = p[0].get_mask(X, Y)
+        for p in args[1:]:
+            local_mask |= p.get_mask(x, Y)
+        return local_mask
+
+    def __repr__(self) -> str:
+        return f"MultiPortal(Portal count: {len(args)})"
+
+
 class PotentialAnchor:
     """
     Якорь потенциала: область с фиксированным потенциалом

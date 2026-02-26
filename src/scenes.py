@@ -4,8 +4,8 @@
 
 
 from simulation import Simulation
-from portals import Portal, CouplePortal, FixedPotentialPortal, PotentialAnchor, MaterialObject
-from masks import RectangleMask, CircleMask, LineMask, PointMask
+from portals import *
+from masks import *
 
 
 def _anchors(sim_width, sim_height):
@@ -55,6 +55,22 @@ def example_couple_circles() -> Simulation:
 
     return Simulation(
         *_anchors(W, H), CouplePortal(p1, p2),
+        sim_width=W, sim_height=H,
+        px_scale=6,
+        iterations_per_frame=50,
+        sor_omega=1.8,
+        isoline_count=15,
+    )
+
+
+def triple_portals() -> Simulation:
+    W, H = 120, 100
+    p1 = Portal(RectangleMask(40, 60, 30, 30), (255, 0, 0))
+    p2 = Portal(RectangleMask(40, 60, 60, 60), (0, 255, 0))
+    p3 = Portal(RectangleMask(40, 60, 90, 90), (0, 0, 255))
+
+    return Simulation(
+        *_anchors(W, H), MultiPortal((p1, p2, p3)),
         sim_width=W, sim_height=H,
         px_scale=6,
         iterations_per_frame=50,

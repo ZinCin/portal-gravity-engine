@@ -205,31 +205,3 @@ class FunctionMask(Mask):
     def translate(self, dx: float, dy: float) -> None:
         self.offset_x += dx
         self.offset_y += dy
-
-
-@dataclass
-class PointMask(Mask):
-    """
-    Точечная маска. Пиксель, ближайший к (x, y)
-
-    Args:
-        x, y: координаты точки в пространстве симуляции
-    """
-
-    x: float
-    y: float
-
-    def __call__(self, X: np.ndarray, Y: np.ndarray) -> np.ndarray:
-        dist = np.hypot(X - self.x, Y - self.y)
-        # Используем форму после broadcast (dist.shape)
-        result = np.zeros(dist.shape, dtype=bool)
-        if result.size > 0:
-            result[np.unravel_index(np.argmin(dist), dist.shape)] = True
-        return result
-
-    def __contains__(self, point: Tuple[float, float]) -> bool:
-        return abs(point[0] - self.x) <= 1.0 and abs(point[1] - self.y) <= 1.0
-
-    def translate(self, dx: float, dy: float) -> None:
-        self.x += dx
-        self.y += dy

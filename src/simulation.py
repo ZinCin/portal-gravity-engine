@@ -7,9 +7,8 @@ import numpy as np
 import pygame
 from typing import List, Optional, Tuple
 
-from portals import (Portal, CouplePortal, FixedPotentialPortal,
-                     PotentialAnchor, MaterialObject, ConductorObject)
-from masks import (Mask, RectangleMask, CircleMask, LineMask, PointMask)
+from portals import *
+from masks import *
 from physics import PhysicsEngine
 from colors import GradientColorMapper, default_color_mapper, COLOR_SCHEMES
 from ui import (
@@ -257,6 +256,8 @@ class Simulation:
             elif isinstance(obj, (FixedPotentialPortal, PotentialAnchor,
                                    MaterialObject, ConductorObject)):
                 to_draw.append((obj.mask, obj.color))
+            elif isinstance(obj, MultiPortal):
+                to_draw += list((p.mask, p.color) for p in obj.args)
 
         for mask, color in to_draw:
             m = mask(self.X, self.Y)  # (H_sim, W_sim) bool
@@ -393,6 +394,10 @@ class Simulation:
             elif isinstance(obj, (FixedPotentialPortal, PotentialAnchor)):
                 if pt in obj:
                     return obj.mask, obj
+            elif isinstance(obj, MultiPortal):
+                for p in obj.args:
+                    if pt in p:
+                        return p.mask, p
         return None, None
 
     def _find_obj_at(self, mx: float, my: float):
@@ -408,6 +413,10 @@ class Simulation:
                                    PotentialAnchor)):
                 if obj.active and pt in obj.mask:
                     return obj
+            elif isinstance(obj, MultiPortal):
+                for p in obj.args:
+                    if pt in p:
+                        return p
         return None
 
     def _build_panel(self) -> TabbedPanel:
@@ -685,22 +694,17 @@ class Simulation:
         # Маска
         if hasattr(obj, "mask"):
             w.append(SectionHeader(0, 0, 0, "Mask type"))
-            w.append(Button(0, 0, 0, 24, "→ Rectangle",
+            w.append(Button(0, 0, 0, 24, "Rectangle",
                             callback=lambda o=obj: self._change_mask(
                                 o, "rect"),
                             active_fn=lambda o=obj: isinstance(
                                 o.mask, RectangleMask)))
-            w.append(Button(0, 0, 0, 24, "* Circle",
+            w.append(Button(0, 0, 0, 24, "Circle",
                             callback=lambda o=obj: self._change_mask(
                                 o, "circle"),
                             active_fn=lambda o=obj: isinstance(
                                 o.mask, CircleMask)))
-            w.append(Button(0, 0, 0, 24, "* Point",
-                            callback=lambda o=obj: self._change_mask(
-                                o, "point"),
-                            active_fn=lambda o=obj: isinstance(
-                                o.mask, PointMask)))
-            w.append(Button(0, 0, 0, 24, "* Line",
+            w.append(Button(0, 0, 0, 24, "Line",
                             callback=lambda o=obj: self._change_mask(
                                 o, "line"),
                             active_fn=lambda o=obj: isinstance(

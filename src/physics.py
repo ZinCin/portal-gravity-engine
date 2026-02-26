@@ -8,15 +8,14 @@ physics.py - физическое ядро симуляции
     PotentialAnchor       φ = const (якорь, граничное условие Дирихле)
     FixedPotentialPortal  φ = const (якорь, граничное условие Дирихле. Обладает физическими свойствами)
     CouplePortal          переносят гравитацию
+    MultiPortal           несколько порталов, соединенных вместе (не спрашивайте)
     MaterialObject        непрозрачное препятствие
     ConductorObject       плавающий проводник
 """
 
 import numpy as np
 from typing import List, Optional
-
-from portals import (CouplePortal, FixedPotentialPortal,
-                     PotentialAnchor, MaterialObject, ConductorObject)
+from portals import *
 
 
 class PhysicsEngine:
@@ -48,6 +47,7 @@ class PhysicsEngine:
         self._cache_dirty = True
         self._portal_mask_cache:   Optional[np.ndarray] = None
         self._active_couples_cache: Optional[list]  = None
+        self._active_multies_cache: Optional[list] = None
         self._material_cache: Optional[list] = None
         self._conductor_cache: Optional[list] = None
         self._dirichlet_cache: Optional[list] = None
@@ -74,6 +74,13 @@ class PhysicsEngine:
             if n1 == 0 or n2 == 0:
                 continue
             active_couples.append((obj, m1, m2))
+
+        active_multies: list = []
+        for obj in self.field:
+            if not isinstance(obj, MultiPortal):
+                continue
+
+            active_multies.append((obj, tuple(p.get_mask(self.X, self.Y) for p in obj.args)))
 
         material_list: list = []
         for obj in self.field:
@@ -104,11 +111,12 @@ class PhysicsEngine:
             frozen |= m
 
         self._active_couples_cache = active_couples
-        self._material_cache       = material_list
-        self._conductor_cache      = conductor_list
-        self._dirichlet_cache      = dirichlet_cache
-        self._portal_mask_cache    = frozen
-        self._cache_dirty          = False
+        self._active_multies_cache = active_multies
+        self._material_cache = material_list
+        self._conductor_cache = conductor_list
+        self._dirichlet_cache = dirichlet_cache
+        self._portal_mask_cache = frozen
+        self._cache_dirty = False
 
     def _apply_dirichlet(self) -> None:
         for obj in self._iter_dirichlet():
@@ -146,6 +154,17 @@ class PhysicsEngine:
         # CouplePortal
         for _, m1, m2 in self._active_couples_cache:
             combined = m1 | m2
+            p[combined] = float(np.mean(p[combined]))
+
+        # MultiPortal
+        for _, generator in self._active_multies_cache:
+            if not len(generator):
+                continue
+
+            combined = generator[0]
+            for i in generator[1:]:
+                combined |= i
+
             p[combined] = float(np.mean(p[combined]))
 
         # ConductorObject

@@ -27,11 +27,12 @@ Controls:
 """
 
 
-from scenes import example_couple_portals
+from scenes import *
 
 
 def main() -> None:
-    sim = example_couple_portals()  # Стартовая сцена
+    #sim = example_couple_portals()  # Стартовая сцена
+    sim = triple_portals()
     sim.run()
 
 
