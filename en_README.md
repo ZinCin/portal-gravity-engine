@@ -6,6 +6,8 @@ You can place anchors, portals, and obstacles on the grid and observe the result
 
 The project was created more as an experiment with a new computation method — Black-Red SOR — than as a general portal sandbox.
 
+<img width="1213" height="749" alt="изображение" src="https://github.com/user-attachments/assets/c9d2846c-b941-43e8-99c8-67707d9a2044" />
+
 ---
 
 ## Table of Contents
@@ -147,6 +149,17 @@ A pair of linked portals with **equal potential**. At each step, the potential a
 p1 = Portal(RectangleMask(25, 75, 25, 26), color=(255, 153, 0))
 p2 = Portal(RectangleMask(25, 75, 94, 95), color=(0, 204, 255))
 couple = CouplePortal(p1, p2)
+```
+
+### `MultiPortal((p1, p2, p3, ...))`
+
+A few of linked portals with **equal potential**. At each step, the potential across the entire linked area is averaged.
+
+```python
+p1 = Portal(RectangleMask(40, 60, 30, 30), (255, 0, 0))
+p2 = Portal(RectangleMask(40, 60, 60, 60), (0, 255, 0))
+p3 = Portal(RectangleMask(40, 60, 90, 90), (0, 0, 255))
+multi = MultiPortal((p1, p2, p3))
 ```
 
 **`Portal` Parameters:**
